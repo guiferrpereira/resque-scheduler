@@ -35,17 +35,6 @@ module ResqueScheduler
   def schedule
     @schedule ||= {}
   end
-  
-  def get_all_elements
-    
-    Array(redis.keys("*")).each do |key|
-      Array(redis.zrange(key, 0, -1)).each do |item|
-        puts "-----------------"
-        puts item
-        puts "-----------------"
-      end
-    end
-  end
 
   # This method is nearly identical to +enqueue+ only it also
   # takes a timestamp which will be used to schedule the job
@@ -151,6 +140,21 @@ module ResqueScheduler
     count = redis.lrem key, 0, encode(job_to_hash(klass, args))
     clean_up_timestamp(key, timestamp)
     count
+  end
+  
+  # Given a klass, returns list jobs for this class
+  #
+  def get_all_by_class(klass)
+    list_items = []
+    Array(redis.keys("delayed:*")).each do |key|
+      redis.lrange(key, 0, -1).each do |item|
+        if item.include?(klass.to_s)
+          list_items << [key, item]
+        end
+      end
+    end
+    
+    return list_items
   end
 
   def count_all_scheduled_jobs
