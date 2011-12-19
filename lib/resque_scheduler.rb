@@ -36,7 +36,7 @@ module ResqueScheduler
     @schedule ||= {}
   end
   
-  def get_all_elements(klass, *args)
+  def get_all_elements
     
     Array(redis.keys("*")).each do |key|
       Array(redis.zrange(key, 0, -1)).each do |item|
