@@ -129,6 +129,18 @@ module ResqueScheduler
     end
     destroyed
   end
+  
+  # Given a timestamp and job (klass + args) it removes all instances and
+  # returns the count of jobs removed.
+  #
+  # O(N) where N is the number of jobs scheduled to fire at the given
+  # timestamp
+  def remove_delayed_job_from_timestamp(timestamp, klass, *args)
+    key = "delayed:#{timestamp.to_i}"
+    count = redis.lrem key, 0, encode(job_to_hash(klass, args))
+    clean_up_timestamp(key, timestamp)
+    count
+  end
 
   def count_all_scheduled_jobs
     total_jobs = 0 
