@@ -35,6 +35,17 @@ module ResqueScheduler
   def schedule
     @schedule ||= {}
   end
+  
+  def get_all_elements(klass, *args)
+    
+    Array(redis.keys("*")).each do |key|
+      Array(redis.zrange(key, 0, -1)).each do |item|
+        puts "-----------------"
+        puts item
+        puts "-----------------"
+      end
+    end
+  end
 
   # This method is nearly identical to +enqueue+ only it also
   # takes a timestamp which will be used to schedule the job
